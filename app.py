@@ -10,6 +10,7 @@ from routes.course_routes import course_routes
 from routes.user_routes import user_routes
 from routes.cover_letter_routes import cover_letter_routes
 from config.db import init_db
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -38,4 +39,5 @@ app.register_blueprint(cover_letter_routes, url_prefix="/api/cover-letter")
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Get Render's assigned port
+    app.run(host="0.0.0.0", port=port, debug=True)
