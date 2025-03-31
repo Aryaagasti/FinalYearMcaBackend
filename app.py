@@ -18,11 +18,22 @@ app = Flask(__name__)
 # Enable CORS for all routes
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173"],  # Allow requests from your frontend
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Allow these HTTP methods
-        "allow_headers": ["Content-Type", "Authorization"]  # Allow these headers
+        "origins": ["http://localhost:5173"],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"],
+        "supports_credentials": True,
+        "max_age": 600  # Cache preflight response for 10 minutes
     }
 })
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    return response
+
 
 # Initialize MongoDB with app
 mongo = init_db(app)
