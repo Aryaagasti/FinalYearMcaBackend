@@ -1,0 +1,53 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+env/
+*.egg-info/
+
+# Flask environment variables and secrets
+.env
+*.env
+config.json
+
+# Logs and database files
+*.log
+logs/
+instance/
+db.sqlite3
+
+# Uploaded files
+uploads/
+
+# IDE/editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+
+# Ignore compiled Python extensions
+*.so
+
+# Cache files
+*.cache
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Dependencies installed via pip
+requirements.txt
+
+# Ignore Render-specific cache
+render.yaml
+render-build.log
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
