@@ -1,31 +1,33 @@
-# utils/file_parser.py
 import PyPDF2
 from docx import Document
-from io import BytesIO
 import time
 
 def parse_resume_file(file):
-    """Extract text from a file (PDF or DOCX)."""
+    """Extract text from a file (PDF or DOCX) with improved error handling."""
     try:
         start_time = time.time()
-        
+        text = ""
+
         if file.filename.endswith('.pdf'):
-            # Extract text from PDF
             pdf_reader = PyPDF2.PdfReader(file)
-            text = ''
             for page in pdf_reader.pages:
-                text += page.extract_text()
+                page_text = page.extract_text()
+                if page_text:
+                    text += page_text + "\n"
         elif file.filename.endswith('.docx'):
-            # Extract text from DOCX
             doc = Document(file)
-            text = '\n'.join([para.text for para in doc.paragraphs])
+            text = '\n'.join([para.text for para in doc.paragraphs if para.text.strip()])
         else:
-            # Assume it's a text file
             text = file.read().decode('utf-8', errors='ignore')
-        
+
         end_time = time.time()
         print(f"Time taken to parse resume: {end_time - start_time:.2f} seconds")
-        return text
+        
+        if not text.strip():
+            raise ValueError("Failed to extract text from resume. Ensure the document is not empty or scanned.")
+
+        return text.strip()
+
     except Exception as e:
         print(f"Error extracting text from file: {e}")
         return ""

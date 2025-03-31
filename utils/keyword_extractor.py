@@ -1,10 +1,40 @@
-# utils/keyword_extractor.py
-from sklearn.feature_extraction.text import CountVectorizer
+import string
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+from collections import Counter
+
+# Ensure necessary NLTK data is downloaded
+nltk.download("stopwords")
+nltk.download("wordnet")
+
+# Initialize NLP tools
+lemmatizer = WordNetLemmatizer()
+stop_words = set(stopwords.words("english"))
+
+def preprocess_text(text):
+    """
+    Preprocess text by:
+    - Converting to lowercase
+    - Removing punctuation
+    - Removing stopwords
+    - Lemmatizing words
+    """
+    if not text or len(text.strip()) == 0:
+        return ""  # Handle empty text gracefully
+
+    text = text.lower()
+    text = text.translate(str.maketrans("", "", string.punctuation))  # Remove punctuation
+    words = text.split()
+    processed_words = [lemmatizer.lemmatize(word) for word in words if word not in stop_words]
+
+    return " ".join(processed_words)
 
 def extract_keywords(text, top_n=10):
-    vectorizer = CountVectorizer(stop_words='english')
-    word_count_matrix = vectorizer.fit_transform([text])
-    word_counts = word_count_matrix.sum(axis=0)
-    word_freq = [(word, word_counts[0, idx]) for word, idx in vectorizer.vocabulary_.items()]
-    word_freq = sorted(word_freq, key=lambda x: x[1], reverse=True)
-    return [word for word, freq in word_freq[:top_n]]
+    """
+    Extracts the most common keywords from the text after preprocessing.
+    """
+    processed_text = preprocess_text(text)
+    words = processed_text.split()
+    word_counts = Counter(words)
+    return [word for word, _ in word_counts.most_common(top_n)]
