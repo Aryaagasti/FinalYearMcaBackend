@@ -38,8 +38,7 @@ uploads/
 pip-log.txt
 pip-delete-this-directory.txt
 
-# Dependencies installed via pip
-requirements.txt
+
 
 # Ignore Render-specific cache
 render.yaml
