@@ -1,22 +1,12 @@
 from flask import Blueprint, request, jsonify
-from flask_cors import cross_origin
 from io import BytesIO
 from services.job_matching_service import fetch_jobs
 from services.resume_service import analyze_resume
 
 job_routes = Blueprint('job_routes', __name__)
 
-@job_routes.route('/match', methods=['POST', 'OPTIONS'])
-@cross_origin(origins='http://localhost:5173', supports_credentials=True)
+@job_routes.route('/match', methods=['POST'])
 def match_jobs():
-    if request.method == 'OPTIONS':
-        # Handle preflight request
-        response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-        return response, 200
-        
     try:
         # Check authorization
         auth_header = request.headers.get('Authorization')
@@ -53,10 +43,7 @@ def match_jobs():
                 "url": job.get("related_links", [{}])[0].get("link", "") if job.get("related_links") else ""
             })
 
-        response = jsonify({"success": True, "jobs": matched_jobs})
-        response.headers.add('Access-Control-Allow-Origin', 'http://localhost:5173')
-        response.headers.add('Access-Control-Allow-Credentials', 'true')
-        return response, 200
+        return jsonify({"success": True, "jobs": matched_jobs}), 200
         
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
