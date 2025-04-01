@@ -49,7 +49,8 @@ def login():
     
     try:
         data = request.get_json()
-    except:
+    except Exception as e:
+        print(f"Error parsing JSON: {e}")  # Debugging print
         return jsonify({"error": "Invalid JSON format"}), 400
 
     email = data.get("email")
