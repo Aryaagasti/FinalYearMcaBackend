@@ -19,7 +19,7 @@ CORS(app, resources={
         "origins": [
             "http://localhost:5173",
             "https://resumepro-resume-analyzer-career.onrender.com",
-            "https://finalyearmcabackend.onrender.com"
+            
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
