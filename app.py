@@ -13,28 +13,18 @@ import os
 
 app = Flask(__name__)
 
-# Enhanced CORS configuration
-CORS(app, resources={
-    r"/api/*": {
-        "origins": [
-            "http://localhost:5173",
-            "https://resumepro-resume-analyzer-career.onrender.com",
-            
-        ],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "expose_headers": ["Content-Type"],
-        "max_age": 600
-    }
-})
+# Correct CORS configuration
+CORS(app, resources={r"/api/*": {"origins": [
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "https://resumepro-resume-analyzer-career.onrender.com"
+]}})
 
-# Additional CORS headers
+# Ensure no conflicting CORS headers
 @app.after_request
 def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
     return response
 
 # Initialize MongoDB
