@@ -7,7 +7,7 @@ from services.resume_service import analyze_resume
 job_routes = Blueprint('job_routes', __name__)
 
 @job_routes.route('/match', methods=['POST', 'OPTIONS'])
-@cross_origin(supports_credentials=True)
+@cross_origin(origins='http://localhost:5173', supports_credentials=True)
 def match_jobs():
     if request.method == 'OPTIONS':
         # Handle preflight request
