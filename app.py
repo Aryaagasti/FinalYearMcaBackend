@@ -6,6 +6,7 @@ from routes.job_routes import job_routes
 from routes.feedback_routes import feedback_routes
 from routes.course_routes import course_routes
 from routes.user_routes import user_routes
+from routes.chatbot_routes import chatbot_routes
 from routes.cover_letter_routes import cover_letter_routes
 from config.db import init_db
 import os
@@ -34,6 +35,7 @@ app.register_blueprint(job_routes, url_prefix="/api/job")
 app.register_blueprint(feedback_routes, url_prefix="/api/feedback")
 app.register_blueprint(course_routes, url_prefix="/api/course")
 app.register_blueprint(user_routes, url_prefix="/api/user")
+app.register_blueprint(chatbot_routes, url_prefix="/api/chatbot")
 app.register_blueprint(cover_letter_routes, url_prefix="/api/cover-letter")
 
 if __name__ == "__main__":
