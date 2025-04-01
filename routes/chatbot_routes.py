@@ -8,7 +8,7 @@ chatbot_routes = Blueprint("chatbot_routes", __name__)
 
 # Configure Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-2.0-flash')
 
 @chatbot_routes.route("/ask", methods=["POST"])
 def ask_question():
