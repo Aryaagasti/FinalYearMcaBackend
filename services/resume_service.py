@@ -1,36 +1,52 @@
-# services/resume_service.py
 from models.resume_model import Resume
 from services.ats_score_service import calculate_ats_score
 from services.gemini_service import analyze_resume_with_gemini
 from utils.file_parser import parse_resume_file
 from utils.keyword_extractor import extract_keywords
+import logging
+
+logger = logging.getLogger(__name__)
 
 def analyze_resume(user_id, file, job_description):
     try:
-        # Parse the resume file (PDF/DOCX)
+        logger.info(f"Starting resume analysis for user {user_id}")
+
+        # Validate file
+        if not file or file.filename == '':
+            raise ValueError("No resume file provided")
+
+        # Parse the resume file
         resume_text = parse_resume_file(file)
-        print(f"Parsed resume text: {resume_text[:100]}...")  # Print first 100 characters of resume text
+        if not resume_text:
+            raise ValueError("Failed to parse resume file")
         
-        # Analyze the resume using the Gemini API
+        logger.debug(f"Resume parsed successfully, length: {len(resume_text)} chars")
+
+        # Analyze with Gemini
         analysis_result = analyze_resume_with_gemini(resume_text, job_description)
-        print(f"Analysis result: {analysis_result}")
+        if not analysis_result:
+            raise ValueError("Gemini analysis failed")
         
-        # Calculate the ATS score
+        logger.debug("Gemini analysis completed")
+
+        # Calculate ATS score
         ats_score = calculate_ats_score(resume_text, job_description)
-        print(f"Calculated ATS score: {ats_score}")
+        logger.debug(f"ATS score calculated: {ats_score}")
+
+        # Extract keywords
+        resume_keywords = extract_keywords(resume_text) or []
+        job_keywords = extract_keywords(job_description) or []
         
-        # Extract keywords from the resume and job description
-        resume_keywords = extract_keywords(resume_text)
-        job_keywords = extract_keywords(job_description)
-        
-        # Format the response
+        # Format response
         response = {
             "ats_score": ats_score,
-            "keywords": list(set(resume_keywords) & set(job_keywords)),  # Intersection of resume and job keywords
-            "suggestions": analysis_result.get("suggestions", [])  # Ensure suggestions is an array
+            "keywords": list(set(resume_keywords) & set(job_keywords)),
+            "suggestions": analysis_result.get("suggestions", []),
+            "missing_keywords": analysis_result.get("missing_keywords", []),
+            "score_breakdown": analysis_result.get("score_breakdown", {})
         }
-        
-        # Save the resume data to MongoDB
+
+        # Save to database
         resume = Resume(
             user_id=user_id,
             resume_text=resume_text,
@@ -39,9 +55,10 @@ def analyze_resume(user_id, file, job_description):
             suggestions=response["suggestions"]
         )
         resume.save()
-        
-        # Return the analysis results
+        logger.info("Resume data saved to database")
+
         return response
+
     except Exception as e:
-        print(f"Error analyzing resume: {str(e)}")
-        return {"error": str(e)}, 500
+        logger.error(f"Error in analyze_resume: {str(e)}")
+        return {"error": str(e)}

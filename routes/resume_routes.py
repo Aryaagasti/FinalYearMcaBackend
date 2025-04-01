@@ -1,28 +1,47 @@
-# routes/resume_routes.py
-
 from flask import Blueprint, request, jsonify
 from utils.jwt_utils import verify_jwt_token
 from services.resume_service import analyze_resume
+import logging
 
 resume_routes = Blueprint("resume_routes", __name__)
+logger = logging.getLogger(__name__)
 
 @resume_routes.route("/analyze", methods=["POST"])
 def analyze():
-    token = request.headers.get("Authorization")
-    if not token:
-        return jsonify({"error": "Missing token"}), 401
+    try:
+        # Verify JWT token
+        token = request.headers.get("Authorization")
+        if not token:
+            logger.error("Missing authorization token")
+            return jsonify({"error": "Authorization token required"}), 401
 
-    # Verify JWT token
-    payload = verify_jwt_token(token)
-    if isinstance(payload, str):
-        return jsonify({"error": payload}), 401
+        payload = verify_jwt_token(token)
+        if isinstance(payload, str):
+            logger.error(f"Token verification failed: {payload}")
+            return jsonify({"error": payload}), 401
 
-    user_id = payload["user_id"]
-    file = request.files.get("resume")
-    job_description = request.form.get("job_description")
+        # Get files and data
+        if 'resume' not in request.files:
+            logger.error("No resume file uploaded")
+            return jsonify({"error": "Resume file is required"}), 400
 
-    if not file or not job_description:
-        return jsonify({"error": "Missing required fields"}), 400
+        file = request.files['resume']
+        job_description = request.form.get('job_description', '').strip()
 
-    result = analyze_resume(user_id, file, job_description)
-    return jsonify(result), 200
+        if not job_description:
+            logger.error("Empty job description")
+            return jsonify({"error": "Job description is required"}), 400
+
+        # Process the resume
+        result = analyze_resume(payload["user_id"], file, job_description)
+        
+        if "error" in result:
+            logger.error(f"Analysis error: {result['error']}")
+            return jsonify(result), 400
+            
+        logger.info("Resume analysis completed successfully")
+        return jsonify(result), 200
+
+    except Exception as e:
+        logger.error(f"Unexpected error in analyze endpoint: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500

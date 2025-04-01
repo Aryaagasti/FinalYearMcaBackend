@@ -13,12 +13,13 @@ import os
 
 app = Flask(__name__)
 
-# Proper CORS configuration with all required headers
+# Enhanced CORS configuration
 CORS(app, resources={
     r"/api/*": {
         "origins": [
-            "http://localhost:5173",  # Keep local development
-            "https://resumepro-resume-analyzer-career.onrender.com"  # Add your deployed frontend
+            "http://localhost:5173",
+            "https://resumepro-resume-analyzer-career.onrender.com",
+            "https://finalyearmcabackend.onrender.com"
         ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
@@ -27,6 +28,14 @@ CORS(app, resources={
         "max_age": 600
     }
 })
+
+# Additional CORS headers
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 # Initialize MongoDB
 mongo = init_db(app)
