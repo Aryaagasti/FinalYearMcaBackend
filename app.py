@@ -16,7 +16,10 @@ app = Flask(__name__)
 # Proper CORS configuration with all required headers
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173"],
+        "origins": [
+            "http://localhost:5173",  # Keep local development
+            "https://resumepro-resume-analyzer-career.onrender.com"  # Add your deployed frontend
+        ],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True,
