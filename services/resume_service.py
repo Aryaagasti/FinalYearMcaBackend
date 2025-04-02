@@ -16,6 +16,7 @@ def analyze_resume(user_id, file, job_description):
             raise ValueError("No resume file provided")
 
         # Parse the resume file
+        logger.info("Parsing resume file")
         resume_text = parse_resume_file(file)
         if not resume_text:
             raise ValueError("Failed to parse resume file")
@@ -23,22 +24,31 @@ def analyze_resume(user_id, file, job_description):
         logger.debug(f"Resume parsed successfully, length: {len(resume_text)} chars")
 
         # Analyze with Gemini
+        logger.info("Analyzing with Gemini")
         analysis_result = analyze_resume_with_gemini(resume_text, job_description)
         if not analysis_result:
-            raise ValueError("Gemini analysis failed")
+            raise ValueError("Gemini analysis returned no results")
         
-        logger.debug("Gemini analysis completed")
+        if "error" in analysis_result:
+            raise ValueError(f"Gemini error: {analysis_result['error']}")
+
+        logger.debug("Gemini analysis completed successfully")
 
         # Calculate ATS score
+        logger.info("Calculating ATS score")
         ats_score = calculate_ats_score(resume_text, job_description)
+        if ats_score is None:
+            raise ValueError("Failed to calculate ATS score")
         logger.debug(f"ATS score calculated: {ats_score}")
 
         # Extract keywords
+        logger.info("Extracting keywords")
         resume_keywords = extract_keywords(resume_text) or []
         job_keywords = extract_keywords(job_description) or []
         
         # Format response
         response = {
+            "success": True,
             "ats_score": ats_score,
             "keywords": list(set(resume_keywords) & set(job_keywords)),
             "suggestions": analysis_result.get("suggestions", []),
@@ -47,6 +57,7 @@ def analyze_resume(user_id, file, job_description):
         }
 
         # Save to database
+        logger.info("Saving to database")
         resume = Resume(
             user_id=user_id,
             resume_text=resume_text,
@@ -59,6 +70,9 @@ def analyze_resume(user_id, file, job_description):
 
         return response
 
+    except ValueError as ve:
+        logger.error(f"Validation error in analyze_resume: {str(ve)}")
+        return {"error": str(ve)}
     except Exception as e:
-        logger.error(f"Error in analyze_resume: {str(e)}")
-        return {"error": str(e)}
+        logger.error(f"Unexpected error in analyze_resume: {str(e)}", exc_info=True)
+        return {"error": "Failed to process resume"}
