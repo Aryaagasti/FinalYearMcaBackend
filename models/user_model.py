@@ -1,14 +1,10 @@
 from datetime import datetime
-from bson import ObjectId  # Import ObjectId for MongoDB
-from config.db import init_db
-
-def get_db():
-    from app import app  # Avoid circular imports
-    return init_db(app).db
+from bson import ObjectId  # For MongoDB ObjectId
+from config.db import get_db  # Import the database initialization
 
 class User:
     def __init__(self, email, name, password, _id=None, created_at=None):
-        self._id = _id if _id else ObjectId()  # MongoDB uses _id
+        self._id = _id if _id else ObjectId()  # MongoDB uses ObjectId for unique identifiers
         self.email = email
         self.name = name
         self.password = password  # Plaintext password (use hashing in production)
@@ -16,17 +12,16 @@ class User:
 
     @property
     def id(self):
-        return str(self._id)  # Provide id property that returns string version
+        return str(self._id)  # Provide a string version of _id for APIs
 
     def save(self):
         db = get_db()
-        # Convert to dict and remove _id if None to let MongoDB generate it
-        user_data = self.__dict__.copy()
-        if user_data['_id'] is None:
-            del user_data['_id']
-        result = db.users.insert_one(user_data)
-        self._id = result.inserted_id  # Update with the generated _id
-        return self
+        # Use update_one with upsert=True to update or insert the user
+        db.users.update_one(
+            {"_id": self._id},  # Match the document by _id
+            {"$set": self.__dict__},  # Update fields
+            upsert=True  # Insert if it doesn't exist
+        )
 
     @staticmethod
     def find_by_email(email):
@@ -60,4 +55,4 @@ class User:
         return None
 
     def verify_password(self, provided_password):
-        return self.password == provided_password  # Use hashing in production
+        return self.password == provided_password  # This should use secure password hashing in production
