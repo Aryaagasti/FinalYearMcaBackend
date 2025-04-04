@@ -17,7 +17,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": [
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://resumepro-resume-analyzer-career.onrender.com"
+    "https://resumepro-resume-analyzer-career-snis.onrender.com"
 ]}})
 
 # Ensure no conflicting CORS headers
