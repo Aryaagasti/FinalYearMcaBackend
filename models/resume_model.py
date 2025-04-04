@@ -1,4 +1,5 @@
 from datetime import datetime
+from bson import ObjectId
 from config.db import init_db
 
 def get_db():
@@ -19,6 +20,12 @@ class Resume:
         db.resumes.insert_one(self.__dict__)
     
     @staticmethod
-    def find_by_user_id(user_id):
+    def find_all_by_user_id(user_id):
         db = get_db()
-        return db.resumes.find_one({"user_id": user_id})
+        # Returns all resumes associated with the user ID
+        return list(db.resumes.find({"user_id": user_id}))
+
+    @staticmethod
+    def find_by_id_and_user_id(resume_id, user_id):
+        db = get_db()
+        return db.resumes.find_one({"_id": ObjectId(resume_id), "user_id": user_id})
