@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from routes.auth_routes import auth_routes
 from routes.resume_routes import resume_routes
-from routes.job_routes import job_routes
+
 from routes.feedback_routes import feedback_routes
 from routes.course_routes import course_routes
 from routes.user_routes import user_routes
@@ -33,7 +33,6 @@ mongo = init_db(app)
 # Register all blueprints
 app.register_blueprint(auth_routes, url_prefix="/api/auth")
 app.register_blueprint(resume_routes, url_prefix="/api/resume")
-app.register_blueprint(job_routes, url_prefix="/api/job")
 app.register_blueprint(feedback_routes, url_prefix="/api/feedback")
 app.register_blueprint(course_routes, url_prefix="/api/course")
 app.register_blueprint(user_routes, url_prefix="/api/user")
